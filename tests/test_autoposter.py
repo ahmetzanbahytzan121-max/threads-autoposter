@@ -79,8 +79,10 @@ class TestEnvUtils(unittest.TestCase):
 class TestContentQueue(unittest.TestCase):
     def test_bundled_posts_json_is_valid_within_500_chars(self) -> None:
         posts = load_posts(PROJECT_DIR / "posts.json")
-        self.assertGreaterEqual(len(posts), 40)
+        self.assertGreaterEqual(len(posts), 60)
         sample_promo = "FREEDOM2026TEST"
+        organic_count = 0
+        longer_count = 0
         for item in posts:
             rendered = render_post(
                 item,
@@ -89,12 +91,21 @@ class TestContentQueue(unittest.TestCase):
                 image_base_url="https://example.com/repo",
             )
             self.assertLessEqual(len(rendered.main_text), 500, rendered.post_id)
+            has_promo_placeholder = any("{PROMO_CODE}" in r for r in item.get("replies", []))
+            if not has_promo_placeholder:
+                organic_count += 1
+            if len(rendered.reply_texts) >= 2:
+                longer_count += 1
             for reply in rendered.reply_texts:
                 self.assertLessEqual(len(reply), 500, rendered.post_id)
-                self.assertIn(sample_promo, reply)
+                self.assertNotIn("{PROMO_CODE}", reply)
+            if has_promo_placeholder:
+                self.assertTrue(any(sample_promo in r for r in rendered.reply_texts), rendered.post_id)
             if item.get("image"):
                 self.assertTrue((PROJECT_DIR / item["image"]).exists(), item["image"])
                 self.assertEqual(rendered.image_url, f"https://example.com/repo/{item['image']}")
+        self.assertGreaterEqual(organic_count, 5)
+        self.assertGreaterEqual(longer_count, 10)
 
     def test_image_falls_back_to_none_without_base_url(self) -> None:
         raw = {"id": "img1", "image": "assets/card-10k-to-6k.jpg", "main": "Hello", "replies": []}
