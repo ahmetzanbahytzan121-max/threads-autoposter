@@ -25,21 +25,25 @@ jobs:
           python-version: "3.12"
 
       - name: Build runtime .env from GitHub Secrets
-        shell: bash
+        shell: python
         env:
           PROMO_CODE: ${{ secrets.PROMO_CODE }}
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           IMAGE_BASE_URL: ${{ vars.IMAGE_BASE_URL }}
         run: |
-          cat << 'EOF' > .env
-          PROMO_CODE=${PROMO_CODE}
-          THREADS_ACCESS_TOKEN=${THREADS_ACCESS_TOKEN}
-          THREADS_USER_ID=${THREADS_USER_ID}
-          LOOP_QUEUE=true
-          REPLY_DELAY_SEC=3
-          IMAGE_BASE_URL=${IMAGE_BASE_URL}
-          EOF
+          import os
+          from pathlib import Path
+
+          lines = [
+              f"PROMO_CODE={os.environ.get('PROMO_CODE', '').strip()}",
+              f"THREADS_ACCESS_TOKEN={os.environ.get('THREADS_ACCESS_TOKEN', '').strip()}",
+              f"THREADS_USER_ID={os.environ.get('THREADS_USER_ID', '').strip()}",
+              "LOOP_QUEUE=true",
+              "REPLY_DELAY_SEC=3",
+              f"IMAGE_BASE_URL={os.environ.get('IMAGE_BASE_URL', '').strip()}",
+          ]
+          Path(".env").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
       - name: Publish next Threads post
         run: python autoposter.py post-next
