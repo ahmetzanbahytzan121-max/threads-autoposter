@@ -1,0 +1,22 @@
+{
+  "posted": {
+    "almaty-astana-check": {
+      "count": 1,
+      "last_posted_at": "2026-11-25T13:19:08.548997+00:00",
+      "last_published_ids": [
+        "18202585840389418",
+        "18455127481124234"
+      ]
+    }
+  },
+  "history": [
+    {
+      "post_id": "almaty-astana-check",
+      "published_ids": [
+        "18202585840389418",
+        "18455127481124234"
+      ],
+      "posted_at": "2026-11-25T13:19:08.548997+00:00"
+    }
+  ]
+}
