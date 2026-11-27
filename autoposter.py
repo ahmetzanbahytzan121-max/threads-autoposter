@@ -307,6 +307,8 @@ def cmd_post_next(
 
     if args.dry_run:
         print(f"[DRY-RUN] Пост ID={rendered.post_id} (категория: {rendered.category})")
+        if rendered.topic_tag:
+            print(f"[TOPIC TAG]: {rendered.topic_tag}")
         if rendered.image_url:
             print(f"[IMAGE URL]: {rendered.image_url}")
         elif rendered.image_path:
@@ -352,6 +354,7 @@ def cmd_post_next(
         reply_texts=rendered.reply_texts,
         media_type=media_type,
         image_url=rendered.image_url,
+        topic_tag=rendered.topic_tag,
         reply_delay_sec=reply_delay,
     )
     record_published_post(state, rendered.post_id, published_ids)

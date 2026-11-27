@@ -194,6 +194,7 @@ class TestThreadsClient(unittest.TestCase):
             reply_texts=["Коммент"],
             media_type="IMAGE",
             image_url="https://example.com/assets/card.jpg",
+            topic_tag="Алматы",
             reply_delay_sec=0.0,
             poll_interval_sec=0.0,
         )
@@ -201,7 +202,12 @@ class TestThreadsClient(unittest.TestCase):
         create_calls = [c for c in opener.calls if c["path"].endswith("/threads")]
         self.assertEqual(create_calls[0]["form"]["media_type"], ["IMAGE"])
         self.assertEqual(create_calls[0]["form"]["image_url"], ["https://example.com/assets/card.jpg"])
+        self.assertEqual(create_calls[0]["form"]["topic_tag"], ["Алматы"])
         self.assertEqual(create_calls[1]["form"]["media_type"], ["TEXT"])
+        self.assertNotIn("topic_tag", create_calls[1]["form"])
+
+        with self.assertRaises(ValueError):
+            client.create_container(user_id="user_42", text="Bad tag", topic_tag="Bad.Tag")
 
     def test_container_error_raises_threads_api_error(self) -> None:
         def handler(call: dict) -> dict:

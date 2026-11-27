@@ -145,6 +145,7 @@ class ThreadsClient:
         image_url: str | None = None,
         video_url: str | None = None,
         reply_to_id: str | None = None,
+        topic_tag: str | None = None,
     ) -> str:
         """Create a Threads media container and return its container ID."""
         token = self._require_token()
@@ -153,6 +154,11 @@ class ThreadsClient:
             raise ValueError(
                 f"Post text exceeds {MAX_TEXT_LENGTH} characters ({len(text)} given)."
             )
+        if topic_tag is not None:
+            clean_tag = topic_tag.strip()
+            if not (1 <= len(clean_tag) <= 50) or "." in clean_tag or "&" in clean_tag:
+                raise ValueError(f"Invalid topic_tag '{topic_tag}': must be 1..50 chars without '.' or '&'.")
+            topic_tag = clean_tag
         if media_type_upper == "TEXT" and not (text and text.strip()):
             raise ValueError("TEXT container requires non-empty text.")
         if media_type_upper == "IMAGE" and not image_url:
@@ -172,6 +178,8 @@ class ThreadsClient:
             form["video_url"] = video_url
         if reply_to_id is not None:
             form["reply_to_id"] = reply_to_id
+        if topic_tag is not None:
+            form["topic_tag"] = topic_tag
 
         data = self._request("POST", f"{self.api_base}/{user_id}/threads", form_data=form)
         container_id = data.get("id")
@@ -235,6 +243,7 @@ class ThreadsClient:
         image_url: str | None = None,
         video_url: str | None = None,
         reply_to_id: str | None = None,
+        topic_tag: str | None = None,
         wait_timeout_sec: float = 60.0,
         poll_interval_sec: float = 2.0,
     ) -> str:
@@ -246,6 +255,7 @@ class ThreadsClient:
             image_url=image_url,
             video_url=video_url,
             reply_to_id=reply_to_id,
+            topic_tag=topic_tag,
         )
         status = self.wait_for_container(
             container_id,
@@ -264,6 +274,7 @@ class ThreadsClient:
         media_type: str = "TEXT",
         image_url: str | None = None,
         video_url: str | None = None,
+        topic_tag: str | None = None,
         reply_delay_sec: float = 3.0,
         wait_timeout_sec: float = 60.0,
         poll_interval_sec: float = 2.0,
@@ -276,6 +287,7 @@ class ThreadsClient:
             media_type=media_type,
             image_url=image_url,
             video_url=video_url,
+            topic_tag=topic_tag,
             wait_timeout_sec=wait_timeout_sec,
             poll_interval_sec=poll_interval_sec,
         )

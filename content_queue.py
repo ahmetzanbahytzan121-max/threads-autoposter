@@ -25,6 +25,7 @@ class RenderedPost:
     reply_texts: list[str]
     image_url: str | None = None
     image_path: str | None = None
+    topic_tag: str | None = None
 
 
 def _render_text(template: str, promo_code: str, allow_placeholder: bool) -> str:
@@ -64,7 +65,7 @@ def load_posts(posts_path: Path) -> list[dict[str, Any]]:
         replies = item.get("replies", [])
         if not isinstance(replies, list) or any(not isinstance(r, str) for r in replies):
             raise ValueError(f"Post '{post_id}' has invalid 'replies' (must be list of strings).")
-        for field in ("image", "image_url"):
+        for field in ("image", "image_url", "topic_tag"):
             val = item.get(field)
             if val is not None and not isinstance(val, str):
                 raise ValueError(f"Post '{post_id}' has invalid '{field}' (must be string).")
@@ -106,6 +107,8 @@ def render_post(
     elif raw_image_path and image_base_url.strip():
         resolved_image_url = f"{image_base_url.strip().rstrip('/')}/{raw_image_path.lstrip('/')}"
 
+    raw_topic_tag = str(raw_post.get("topic_tag") or "").strip()
+
     return RenderedPost(
         post_id=post_id,
         category=category,
@@ -113,6 +116,7 @@ def render_post(
         reply_texts=reply_texts,
         image_url=resolved_image_url,
         image_path=raw_image_path or None,
+        topic_tag=raw_topic_tag or None,
     )
 
 
